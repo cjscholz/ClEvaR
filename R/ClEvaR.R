@@ -15,10 +15,10 @@
 
 
 #' Mutual Information
-#' 
+#'
 #' @param subject Vector of reference cluster assignments.
 #' @param query Vector of cluster assignments for comparison.
-#' @return 
+#' @return
 MI <- function(subject, query) {
   # infotheo license: GPL (>= 3)
   infotheo::mutinformation(X = subject,
@@ -28,10 +28,10 @@ MI <- function(subject, query) {
 
 
 #' Normalized Mutual Information
-#' 
+#'
 #' @param subject Vector of reference cluster assignments.
 #' @param query Vector of cluster assignments for comparison.
-#' @return 
+#' @return
 NMI <- function(subject, query) {
   mi <- MI(subject, query)
   s1 <- tabulate(subject)
@@ -44,10 +44,10 @@ NMI <- function(subject, query) {
 }
 
 #' Expected Mutual Information
-#' 
+#'
 #' @param subject Vector of reference cluster assignments.
 #' @param query Vector of cluster assignments for comparison.
-#' @return 
+#' @return
 EMI <- function(subject, query) {
   mi <- MI(subject, query)
   s1 <- tabulate(subject)
@@ -61,14 +61,14 @@ EMI <- function(subject, query) {
       max_nij <- min(s1[i],s2[j])
       n.ij <- seq(min_nij, max_nij)   #sequence of consecutive numbers
       t1<- (n.ij / N) * log((n.ij * N) / (s1[i]*s2[j]))
-      t2 <- exp(lfactorial(s1[i]) + 
-                  lfactorial(s2[j]) + 
+      t2 <- exp(lfactorial(s1[i]) +
+                  lfactorial(s2[j]) +
                   lfactorial(N - s1[i]) +
-                  lfactorial(N - s2[j]) - 
-                  lfactorial(N) - 
-                  lfactorial(n.ij) - 
-                  lfactorial(s1[i] - n.ij) - 
-                  lfactorial(s2[j] - n.ij) - 
+                  lfactorial(N - s2[j]) -
+                  lfactorial(N) -
+                  lfactorial(n.ij) -
+                  lfactorial(s1[i] - n.ij) -
+                  lfactorial(s2[j] - n.ij) -
                   lfactorial(N - s1[i] - s2[j] + n.ij))
       emi <- sum(t1*t2)
       s_emi <- s_emi + emi
@@ -78,10 +78,10 @@ EMI <- function(subject, query) {
 }
 
 #' Adjusted Mutual Information
-#' 
+#'
 #' @param subject Vector of reference cluster assignments.
 #' @param query Vector of cluster assignments for comparison.
-#' @return 
+#' @return
 AMI <- function(subject, query) {
   mi <- MI(subject, query)
   emi <- EMI(subject, query)
@@ -97,23 +97,52 @@ AMI <- function(subject, query) {
 
 
 #################################################
+## Differentially Expressed Genes
+#################################################
+
+#' Select potential marker genes from differentially expressed genes on effect size and presence in other clusters
+#'
+#' @param FGDEGtab The raw FASTGenomics Differentially Expressed Gene table, e.g. the output from FASTGenomics calc_de_genes_nonparametric.
+#' @param minES
+#' @param maxClustersPerGene
+#' @param clusterColumn Column name for cluster assignment; defaults to "cluster_id".
+#' @param geneColumn Column name for gene ID; defaults to "entrez_id".
+#' @param effectColumn Column name for effect size; defaults to "effect.size".
+#' @return The filtered FASTGenomics Differentially Expressed Gene table.
+selectMarkerGenes <- function(FGDEGtab,
+                              minES = 0.5,
+                              maxClustersPerGene = 1,
+                              clusterColumn = "cluster_id",
+                              geneColumn = "entrez_id",
+                              effectColumn = "effect.size") {
+  ESfiltered <- FGDEGtab[FGDEGtab[, effectColumn]>=minES, ]
+  allGenes <- unique(ESfiltered[, geneColumn])
+  clusterCounts <- sapply(allGenes, function(x, y) sum(x==y), y=ESfiltered[, geneColumn])
+  index <- match(ESfiltered[, geneColumn], allGenes)
+  ESfiltered$clusterHits <- clusterCounts[index]
+  ESHitsFiltered <- subset(ESfiltered, clusterHits<=maxClustersPerGene)
+  return(ESHitsFiltered)
+}
+
+
+#################################################
 ## Visualization
 #################################################
 
 #' Make Donut Plot.
-#' 
+#'
 #' @param subject \code{Vector} of reference cluster assignments.
 #' @param query \code{Vector} of cluster assignments for comparison with reference.
 #' @param subquery \code{Vector} of lower level cluster assignments for comparison with reference. Defaults to \code{NULL}.
 #' @param colorList=NULL A named \code{list} of colors for clusters. The \code{list} needs elements "query" and optionally "subquery".
 #' @param pieLim \code{vector} of length 2 giving the \code{xlim} values for pies; defaults to \code{c(0, 4)}.
 #' @param pieCut \code{integer} giving the radius of the query pie if subquery is defined; should be within the \code{pieLim} range; defaults to \code{2.5}.
-#' @param piesPerRow Number of pies per row. 
+#' @param piesPerRow Number of pies per row.
 #' @return A \code{list} with elements \code{donuts} (a ggplot object) and \code{data} (the underlying data.frame).
 #' @examples
 #' add(1, 1)
 #' add(10, 1)
-makeDonuts <- function(subject, 
+makeDonuts <- function(subject,
                        query,
                        subquery = NULL,
                        colorList = NULL,
@@ -163,7 +192,7 @@ makeDonuts <- function(subject,
   plotTable <- subset(plotTable, count!=0)
   plotTable <- plotTable[order(plotTable$subject),]
   plotTable$prop <- plotTable$from <- plotTable$to <- 0
-  
+
   for (i in levels(subject)) {
     index <- plotTable$subject==i
     plotTable$prop[index] <- plotTable$count[index] / sum(plotTable$count[index])
@@ -173,34 +202,34 @@ makeDonuts <- function(subject,
   # make ggplot object with donuts
   donutList$donuts <- ggplot2::ggplot(plotTable)
   donutList$donuts <- if (is.null(subquery)) {
-    donutList$donuts + ggplot2::geom_rect(ggplot2::aes(fill = query, 
-                                                    ymin = from, 
-                                                    ymax = to, 
-                                                    xmin = min(pieLim), 
+    donutList$donuts + ggplot2::geom_rect(ggplot2::aes(fill = query,
+                                                    ymin = from,
+                                                    ymax = to,
+                                                    xmin = min(pieLim),
                                                     xmax = max(pieLim)))
   } else {
-    donutList$donuts + ggplot2::geom_rect(ggplot2::aes(fill = subquery, 
-                                                    ymin = from, 
-                                                    ymax = to, 
-                                                    xmin = pieCut, 
-                                                    xmax = max(pieLim))) + 
-      ggplot2::geom_rect(ggplot2::aes(fill = query, 
-                                      ymin = from, 
-                                      ymax = to, 
-                                      xmin = min(pieLim), 
+    donutList$donuts + ggplot2::geom_rect(ggplot2::aes(fill = subquery,
+                                                    ymin = from,
+                                                    ymax = to,
+                                                    xmin = pieCut,
+                                                    xmax = max(pieLim))) +
+      ggplot2::geom_rect(ggplot2::aes(fill = query,
+                                      ymin = from,
+                                      ymax = to,
+                                      xmin = min(pieLim),
                                       xmax = pieCut))
   }
   donutList$donuts <- donutList$donuts +
-    ggplot2::coord_polar(theta = "y") + 
-    ggplot2::xlim(pieLim) + 
-    ggplot2::scale_fill_manual(values = colorList$allColors) + 
-    ggplot2::theme_classic() + 
+    ggplot2::coord_polar(theta = "y") +
+    ggplot2::xlim(pieLim) +
+    ggplot2::scale_fill_manual(values = colorList$allColors) +
+    ggplot2::theme_classic() +
     ggplot2::theme(panel.grid = ggplot2::element_blank()) +
     ggplot2::theme(axis.text = ggplot2::element_blank()) +
     ggplot2::theme(axis.ticks = ggplot2::element_blank()) +
-    ggplot2::theme(axis.line = ggplot2::element_blank()) + 
+    ggplot2::theme(axis.line = ggplot2::element_blank()) +
     ggplot2::theme(legend.position = "none") +
-    ggplot2::labs(title = "") + 
+    ggplot2::labs(title = "") +
     ggplot2::facet_wrap(~subject, ncol = piesPerRow)
   donutList$data <- plotTable
   return(donutList)
@@ -208,7 +237,7 @@ makeDonuts <- function(subject,
 
 
 #' Plot the legend(s) for donut plots.
-#' 
+#'
 #' @param data \code{data.frame} returned from \code{makeDonuts} in list element \code{data}.
 #' @examples
 #' add(1, 1)
@@ -243,7 +272,7 @@ plotLegend <- function(data, subquery = FALSE) {
 
 
 #' Plot donuts.
-#' 
+#'
 #' @param subject \code{Vector} of reference cluster assignments.
 #' @param query \code{Vector} of cluster assignments for comparison with reference.
 #' @param subquery \code{Vector} of lower level cluster assignments for comparison with reference. Defaults to \code{NULL}.
@@ -278,12 +307,12 @@ plotDonuts <- function(subject, query, subquery = NULL, savePDF = FALSE, ...) {
 #
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
-  
+
   # Make a list from the ... arguments and plotlist
   plots <- c(list(...), plotlist)
-  
+
   numPlots = length(plots)
-  
+
   # If layout is NULL, then use 'cols' to determine layout
   if (is.null(layout)) {
     # Make the panel
@@ -293,20 +322,20 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
                      ncol = cols, nrow = ceiling(numPlots/cols))
     layout <- t(layout)
   }
-  
+
   if (numPlots==1) {
     print(plots[[1]])
-    
+
   } else {
     # Set up the page
     grid.newpage()
     pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-    
+
     # Make each plot, in the correct location
     for (i in 1:numPlots) {
       # Get the i,j matrix positions of the regions that contain this subplot
       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-      
+
       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
                                       layout.pos.col = matchidx$col))
     }
@@ -317,7 +346,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 
 
 #' Plot a confusion heatmap.
-#' 
+#'
 #' @param subject \code{Vector} of reference cluster assignments.
 #' @param query \code{Vector} of cluster assignments for comparison with reference.
 #' @param logCounts Should counts in confusion matrix be \code{log10(counts+1)} transformed? Defaults to \code{FALSE}.
@@ -348,9 +377,9 @@ confusionHeatmap <- function(subject,
   confusionMatrix <- confusionMatrix[, index]
   index <- order(apply(confusionMatrix, 1, max), decreasing = TRUE)
   confusionMatrix <- confusionMatrix[index,]
-  pheatmap(confusionMatrix,
-           cluster_rows = FALSE,
-           cluster_cols = FALSE,
-           ...)
+  pheatmap::pheatmap(confusionMatrix,
+                     cluster_rows = FALSE,
+                     cluster_cols = FALSE,
+                     ...)
   return(confusionMatrix)
 }
