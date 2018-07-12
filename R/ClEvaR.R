@@ -77,6 +77,7 @@ EMI <- function(subject, query) {
   return(s_emi)
 }
 
+
 #' Adjusted Mutual Information
 #'
 #' @param subject Vector of reference cluster assignments.
@@ -97,14 +98,56 @@ AMI <- function(subject, query) {
 
 
 #################################################
+## FASTGenomics I/O
+#################################################
+
+#' Read expression data from FASTGenomics HDF5 file.
+#'
+#' @param fileName Name of FASTGenomics HDF5 file.
+#' @param cellIDs Optional vector of cell IDs (i.e. row names) to be read from FASTGenomics HDF5 file.
+#' @param geneIDs Optional vector of gene IDs (i.e. column names) to be read from FASTGenomics HDF5 file.
+#' @param matrixName Dataset name of expression matrix in HDF5 file; defaults to "/matrix".
+#' @param observationsName Dataset name of observation (i.e. cell) name vector in HDF5 file; defaults to "/obs_names".
+#' @param variablesName Dataset name of variable (i.e. gene) name vector in HDF5 file; defaults to "/var_names".
+#' @return A sparse Matrix of expression values in cells x genes format.
+readFGH5 <- function(fileName,
+                     cellIDs = NULL,
+                     geneIDs = NULL,
+                     matrixName = "/matrix",
+                     observationsName = "/obs_names",
+                     variablesName = "/var_names") {
+  tmpH5 <- h5::h5file(fileName)
+  cellIndex <- if (is.null(cellIDs)) {
+    rep(TRUE, length(tmpH5[observationsName][]))
+  } else {
+    tmpH5[observationsName][] %in% cellIDs
+  }
+  geneIndex <- if (is.null(geneIDs)) {
+    rep(TRUE, length(tmpH5[variablesName][]))
+  } else {
+    tmpH5[variablesName][] %in% geneIDs
+  }
+  cellIndex <- which(cellIndex)
+  geneIndex <- which(geneIndex)
+  exprs <- Matrix::Matrix(tmpH5[matrixName][cellIndex, geneIndex],
+                          sparse = TRUE)
+  rownames(exprs) <- tmpH5[observationsName][cellIndex]
+  colnames(exprs) <- tmpH5[variablesName][geneIndex]
+  h5::h5close(tmpH5)
+  return(exprs)
+}
+
+
+
+#################################################
 ## Differentially Expressed Genes
 #################################################
 
 #' Select potential marker genes from differentially expressed genes on effect size and presence in other clusters
 #'
 #' @param FGDEGtab The raw FASTGenomics Differentially Expressed Gene table, e.g. the output from FASTGenomics calc_de_genes_nonparametric.
-#' @param minES
-#' @param maxClustersPerGene
+#' @param minES Minimal effect size for gene to be considered; defaults to 0.5.
+#' @param maxClustersPerGene Maximum number of clusters that contain a potential marker gene; defaults to 1.
 #' @param clusterColumn Column name for cluster assignment; defaults to "cluster_id".
 #' @param geneColumn Column name for gene ID; defaults to "entrez_id".
 #' @param effectColumn Column name for effect size; defaults to "effect.size".
@@ -122,6 +165,35 @@ selectMarkerGenes <- function(FGDEGtab,
   ESfiltered$clusterHits <- clusterCounts[index]
   ESHitsFiltered <- subset(ESfiltered, clusterHits<=maxClustersPerGene)
   return(ESHitsFiltered)
+}
+
+
+#' Construct a matrix of expression summary values per cluster.
+#'
+#' @param FGDEGtab The raw FASTGenomics Differentially Expressed Gene table, e.g. the output from FASTGenomics calc_de_genes_nonparametric.
+#' @param FGexprs A sparse Matrix of expression values in cells x genes format.
+#' @param FGassign data.frame with cluster assignments for cells.
+#' @param Q Quantile used for expression value summary; defaults to 0.5, i.e. the median.
+#' @param cellColumn Column name for cell name; defaults to "cell_id".
+#' @param geneColumn Column name for gene ID; defaults to "entrez_id".
+#' @param clusterColumn Column name for cluster assignment; defaults to "cluster_id".
+#' @return A gene x cluster matrix of summarized cluster expression values.
+clusterExprsSummaryMatrix <- function(FGDEGtab,
+                                      FGexprs,
+                                      FGassign,
+                                      Q = 0.5,
+                                      cellColumn = "cell_id",
+                                      geneColumn = "entrez_id",
+                                      clusterColumn = "cluster_id") {
+  FGassign <- FGassign[FGassign[, cellColumn] %in% rownames(FGexprs),]
+  clusterAssignments <- split(x = as.character(FGassign[, cellColumn]),
+                              f = FGassign[, clusterColumn])
+  deGenes <- as.character(unique(FGDEGtab[, geneColumn]))
+  deGenes <- deGenes[deGenes %in% colnames(FGexprs)]
+  FGexprs <- FGexprs[, deGenes]
+  FGexprs <- sapply(clusterAssignments, function(ca, M) M[ca,], M=FGexprs)
+  qMat <- sapply(FGexprs, function(m, q) apply(m, 2, quantile, probs=q), q=Q)
+  return(qMat)
 }
 
 
