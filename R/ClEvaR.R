@@ -172,6 +172,64 @@ selectMarkerGenes <- function(FGDEGtab,
 }
 
 
+#' Construct a matrix of clusters with marker genes captured with
+#' ranges of effect size and cluster hit threshold values.
+#' The resulting matrix should help at selecting optimal threshold values.
+#'
+#' @param FGDEGtab The raw FASTGenomics Differentially Expressed Gene table, e.g. the output from FASTGenomics calc_de_genes_nonparametric.
+#' @param esThresh A vector of minimal effect sizes; defaults to \code{seq(0.5, 1, .01)}.
+#' @param nThresh An optional vector of maximum cluster numbers that contain a potential marker gene; defaults to NULL, which takes the range between 1 and the maximum number of clusters found in the FGDGEtab.
+#' @param clusterColumn Column name for cluster assignment; defaults to "cluster_id".
+#' @param geneColumn Column name for gene ID; defaults to "entrez_id".
+#' @param effectColumn Column name for effect size; defaults to "effect.size".
+#' @return The marker threshold matrix.
+#' @export
+characterizeMarkerThresholds <- function(FGDEGtab,
+                                         esThresh = seq(0.5, 1, .01),
+                                         nThresh = NULL,
+                                         clusterColumn = "cluster_id",
+                                         geneColumn = "entrez_id",
+                                         effectColumn = "effect.size") {
+  thresholdMatrix <- matrix(data = 0,
+                            nrow = length(esThresh),
+                            ncol = length(nThresh))
+  if (is.null(nThresh)) nThresh <- 1:(length(unique(FGDEGtab[, clusterColumn])))
+  for (i in 1:length(esThresh)) {
+    for (j in 1:length(nThresh)) {
+      tmp <- selectMarkerGenes(FGDEGtab = FGDEGtab,
+                               minES = esThresh[i],
+                               maxClustersPerGene = nThresh[j],
+                               clusterColumn = clusterColumn,
+                               geneColumn = geneColumn,
+                               effectColumn = effectColumn)
+      thresholdMatrix[i, j] <- length(unique(tmp[, clusterColumn]))
+    }
+  }
+  rownames(thresholdMatrix) <- paste("ES=", esThresh, sep ="")
+  colnames(thresholdMatrix) <- paste(nThresh, "cluster")
+  return(thresholdMatrix)
+}
+
+
+#' Find optimized values for minES and maxClustersPerGene in marker threshold matrix.
+#' Assumes that most stringent parameter combination is in the bottom left corner
+#' and the least stringent combination is in the upper right corner of the
+#' marker threshold matrix.
+#'
+#' @param MTM The marker threshold matrix.
+#' @param targetValue The minimum target value that will be searched the the marker threshold matrix; defaults to \code{max(MTM)}.
+#' @return A vector of length 2 containing optimized values for minES and maxClustersPerGene.
+findMarkerThresholds <- function(MTM,
+                                 targetValue = max(MTM)) {
+  thresholdReached <- MTM>=targetValue
+  # flip the matrix so that high stringency has high index positions
+  thresholdReached <- thresholdReached[, seq(ncol(thresholdReached, 1))]
+  # apply(thresholdReached, 1, function(x) ifelse(sum(x)>0, max(which(x)), 0))
+  # apply(thresholdReached, 1, function(y) ifelse(sum(y)>0, max(which(y)), 0))
+  # ...
+}
+
+
 #' Construct a matrix of expression summary values per cluster.
 #'
 #' @param FGDEGtab The raw FASTGenomics Differentially Expressed Gene table, e.g. the output from FASTGenomics calc_de_genes_nonparametric.
