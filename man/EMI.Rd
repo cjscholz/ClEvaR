@@ -11,6 +11,9 @@ EMI(subject, query)
 
 \item{query}{Vector of cluster assignments for comparison.}
 }
+\value{
+Expected Mutual Information, a numeric vector of length 1.
+}
 \description{
 Expected Mutual Information
 }

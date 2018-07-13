@@ -29,7 +29,3 @@ A \code{list} with elements \code{donuts} (a ggplot object) and \code{data} (the
 \description{
 Make Donut Plot.
 }
-\examples{
-add(1, 1)
-add(10, 1)
-}

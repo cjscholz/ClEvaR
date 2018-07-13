@@ -11,6 +11,9 @@ AMI(subject, query)
 
 \item{query}{Vector of cluster assignments for comparison.}
 }
+\value{
+Adjusted Mutual Information, a numeric vector of length 1.
+}
 \description{
 Adjusted Mutual Information
 }

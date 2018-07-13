@@ -11,6 +11,9 @@ NMI(subject, query)
 
 \item{query}{Vector of cluster assignments for comparison.}
 }
+\value{
+Normalized Mutual Information, a numeric vector of length 1.
+}
 \description{
 Normalized Mutual Information
 }

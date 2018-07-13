@@ -18,7 +18,7 @@
 #'
 #' @param subject Vector of reference cluster assignments.
 #' @param query Vector of cluster assignments for comparison.
-#' @return
+#' @return Mutual Information, a numeric vector of length 1.
 MI <- function(subject, query) {
   # infotheo license: GPL (>= 3)
   infotheo::mutinformation(X = subject,
@@ -31,7 +31,8 @@ MI <- function(subject, query) {
 #'
 #' @param subject Vector of reference cluster assignments.
 #' @param query Vector of cluster assignments for comparison.
-#' @return
+#' @return Normalized Mutual Information, a numeric vector of length 1.
+#' @export
 NMI <- function(subject, query) {
   mi <- MI(subject, query)
   s1 <- tabulate(subject)
@@ -47,7 +48,7 @@ NMI <- function(subject, query) {
 #'
 #' @param subject Vector of reference cluster assignments.
 #' @param query Vector of cluster assignments for comparison.
-#' @return
+#' @return Expected Mutual Information, a numeric vector of length 1.
 EMI <- function(subject, query) {
   mi <- MI(subject, query)
   s1 <- tabulate(subject)
@@ -82,7 +83,8 @@ EMI <- function(subject, query) {
 #'
 #' @param subject Vector of reference cluster assignments.
 #' @param query Vector of cluster assignments for comparison.
-#' @return
+#' @return Adjusted Mutual Information, a numeric vector of length 1.
+#' @export
 AMI <- function(subject, query) {
   mi <- MI(subject, query)
   emi <- EMI(subject, query)
@@ -110,6 +112,7 @@ AMI <- function(subject, query) {
 #' @param observationsName Dataset name of observation (i.e. cell) name vector in HDF5 file; defaults to "/obs_names".
 #' @param variablesName Dataset name of variable (i.e. gene) name vector in HDF5 file; defaults to "/var_names".
 #' @return A sparse Matrix of expression values in cells x genes format.
+#' @export
 readFGH5 <- function(fileName,
                      cellIDs = NULL,
                      geneIDs = NULL,
@@ -152,6 +155,7 @@ readFGH5 <- function(fileName,
 #' @param geneColumn Column name for gene ID; defaults to "entrez_id".
 #' @param effectColumn Column name for effect size; defaults to "effect.size".
 #' @return The filtered FASTGenomics Differentially Expressed Gene table.
+#' @export
 selectMarkerGenes <- function(FGDEGtab,
                               minES = 0.5,
                               maxClustersPerGene = 1,
@@ -178,6 +182,7 @@ selectMarkerGenes <- function(FGDEGtab,
 #' @param geneColumn Column name for gene ID; defaults to "entrez_id".
 #' @param clusterColumn Column name for cluster assignment; defaults to "cluster_id".
 #' @return A gene x cluster matrix of summarized cluster expression values.
+#' @export
 clusterExprsSummaryMatrix <- function(FGDEGtab,
                                       FGexprs,
                                       FGassign,
@@ -211,9 +216,6 @@ clusterExprsSummaryMatrix <- function(FGDEGtab,
 #' @param pieCut \code{integer} giving the radius of the query pie if subquery is defined; should be within the \code{pieLim} range; defaults to \code{2.5}.
 #' @param piesPerRow Number of pies per row.
 #' @return A \code{list} with elements \code{donuts} (a ggplot object) and \code{data} (the underlying data.frame).
-#' @examples
-#' add(1, 1)
-#' add(10, 1)
 makeDonuts <- function(subject,
                        query,
                        subquery = NULL,
@@ -311,9 +313,6 @@ makeDonuts <- function(subject,
 #' Plot the legend(s) for donut plots.
 #'
 #' @param data \code{data.frame} returned from \code{makeDonuts} in list element \code{data}.
-#' @examples
-#' add(1, 1)
-#' add(10, 1)
 plotLegend <- function(data, subquery = FALSE) {
   if (subquery) {
     clusterColumn <- "subquery"
@@ -350,7 +349,7 @@ plotLegend <- function(data, subquery = FALSE) {
 #' @param subquery \code{Vector} of lower level cluster assignments for comparison with reference. Defaults to \code{NULL}.
 #' @param savePDF Should plots be saved in PDF? Defaults to \code{FALSE}.
 #' @param ... Further parameters used for function \code{makeDonuts}.
-#' @examples
+#' @export
 plotDonuts <- function(subject, query, subquery = NULL, savePDF = FALSE, ...) {
   require(ggplot2)
   donuts <- makeDonuts(subject, query, subquery, ...)
@@ -431,6 +430,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 #' confusionHeatmap(a, b)
 #' confusionHeatmap(a, b, logCounts = T)
 #' confusionHeatmap(a, b, rankCounts = T)
+#' @export
 confusionHeatmap <- function(subject,
                              query,
                              logCounts = FALSE,

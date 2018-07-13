@@ -2,18 +2,15 @@ Package: ClEvaR
 Type: Package
 Title: Cluster Evaluation in R
 Version: 0.1.0
-Author: person("Claus", "Scholz", email="cscholz@uni-bonn.de", role=c("aut", "cre"))
-Maintainer: person("Claus", "Scholz", email="cscholz@uni-bonn.de", role=c("aut", "cre"))
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author@R: person("Claus", "Scholz", email="cscholz@uni-bonn.de", role=c("aut", "cre"))
+Description: Methods for comparison of single-cell RNAseq cluster results.
 License: GPL-3
 Encoding: UTF-8
 Imports:
-  infotheo (>=1.2.0),
-  h5 (>=0.9.9),
-  Matrix (>=1.2-14),
-  ggplot2 (>=2.2.1),
-  pheatmap (>=1.0.10)
-  
+    infotheo (>= 1.2.0),
+    h5 (>= 0.9.9),
+    Matrix (>= 1.2),
+    ggplot2 (>= 2.2.1),
+    pheatmap (>= 1.0.10)
 LazyData: true
 RoxygenNote: 6.0.1

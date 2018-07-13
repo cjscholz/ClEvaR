@@ -12,7 +12,3 @@ plotLegend(data, subquery = FALSE)
 \description{
 Plot the legend(s) for donut plots.
 }
-\examples{
-add(1, 1)
-add(10, 1)
-}
