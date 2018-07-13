@@ -2,8 +2,9 @@ Package: ClEvaR
 Type: Package
 Title: Cluster Evaluation in R
 Version: 0.1.0
-Author@R: person("Claus", "Scholz", email="cscholz@uni-bonn.de", role=c("aut", "cre"))
-Description: Methods for comparison of single-cell RNAseq cluster results.
+Authors@R: person("Claus", "Scholz", email="cscholz@uni-bonn.de", role=c("aut", "cre"))
+Description: Methods for comparison and visualization of single-cell RNAseq cluster results.
+    Used to complement functionality of FASTGenomics (https://fastgenomics.org).
 License: GPL-3
 Encoding: UTF-8
 Imports:
