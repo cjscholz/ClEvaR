@@ -2,6 +2,7 @@
 
 export(AMI)
 export(NMI)
+export(characterizeMarkerThresholds)
 export(clusterExprsSummaryMatrix)
 export(confusionHeatmap)
 export(plotDonuts)
