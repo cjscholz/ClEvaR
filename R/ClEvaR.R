@@ -190,10 +190,15 @@ characterizeMarkerThresholds <- function(FGDEGtab,
                                          clusterColumn = "cluster_id",
                                          geneColumn = "entrez_id",
                                          effectColumn = "effect.size") {
+  if (is.null(nThresh)) {
+    nClust <- length(unique(FGDEGtab[, clusterColumn]))
+    propClust <- round(0.1*nClust)
+    maxClust <- max(2, propClust)
+    nThresh <- 1:maxClust
+  }
   thresholdMatrix <- matrix(data = 0,
                             nrow = length(esThresh),
                             ncol = length(nThresh))
-  if (is.null(nThresh)) nThresh <- 1:(length(unique(FGDEGtab[, clusterColumn])))
   for (i in 1:length(esThresh)) {
     for (j in 1:length(nThresh)) {
       tmp <- selectMarkerGenes(FGDEGtab = FGDEGtab,
