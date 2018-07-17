@@ -3,6 +3,7 @@
 export(AMI)
 export(NMI)
 export(characterizeMarkerThresholds)
+export(clusterExclusivity)
 export(clusterExprsSummaryMatrix)
 export(clusterGranularity)
 export(confusionHeatmap)

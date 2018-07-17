@@ -114,6 +114,23 @@ clusterGranularity <- function(subject, query, plot = FALSE) {
 }
 
 
+#' Cluster Exclusivity
+#'
+#' Computes if query clusters are exclusively assigned to subject cluster.
+#' @param subject Vector of reference cluster assignments.
+#' @param query Vector of cluster assignments for comparison.
+#' @param maxIgnore Maximum count that is ignored in contingency matrix; defaults to 0.
+#' @return Vector of cluster exclusivities for each subject cluster.
+#' @export
+clusterExclusivity <- function(subject, query, maxIgnore = 0) {
+  counts <- as.matrix(ftable(subject~query))
+  rowProps <- counts/rowSums(counts)
+  propSums <- colSums(rowProps)
+  clusterCount <- apply(rowProps, 2, function(x, max) sum(x>max), max = maxIgnore)
+  return(propSums/clusterCount)
+}
+
+
 #################################################
 ## FASTGenomics I/O
 #################################################
