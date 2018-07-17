@@ -98,6 +98,21 @@ AMI <- function(subject, query) {
 }
 
 
+#' Cluster Granularity
+#'
+#' Computes the proportion of query clusters assigned to each subject cluster.
+#' @param subject Vector of reference cluster assignments.
+#' @param query Vector of cluster assignments for comparison.
+#' @param plot Display the query x subject matrix; defaults to \code{FALSE}.
+#' @return Vector of cluster granularities for each subject cluster.
+#' @export
+clusterGranularity <- function(subject, query, plot = FALSE) {
+  counts <- as.matrix(ftable(subject~query))
+  rowProps <- counts/rowSums(counts)
+  if (plot) pheatmap::pheatmap(rowProps)
+  return(colSums(rowProps))
+}
+
 
 #################################################
 ## FASTGenomics I/O
