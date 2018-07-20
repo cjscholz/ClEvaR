@@ -2,9 +2,7 @@
 % Please edit documentation in R/ClEvaR.R
 \name{characterizeMarkerThresholds}
 \alias{characterizeMarkerThresholds}
-\title{Construct a matrix of clusters with marker genes captured with
-ranges of effect size and cluster hit threshold values.
-The resulting matrix should help at selecting optimal threshold values.}
+\title{Characterize Marker Thresholds}
 \usage{
 characterizeMarkerThresholds(FGDEGtab, esThresh = seq(0.5, 1, 0.01),
   nThresh = NULL, clusterColumn = "cluster_id", geneColumn = "entrez_id",

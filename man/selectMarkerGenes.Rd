@@ -2,7 +2,7 @@
 % Please edit documentation in R/ClEvaR.R
 \name{selectMarkerGenes}
 \alias{selectMarkerGenes}
-\title{Select potential marker genes from differentially expressed genes on effect size and presence in other clusters}
+\title{Select Marker Genes}
 \usage{
 selectMarkerGenes(FGDEGtab, minES = 0.5, maxClustersPerGene = 1,
   clusterColumn = "cluster_id", geneColumn = "entrez_id",

@@ -2,10 +2,7 @@
 % Please edit documentation in R/ClEvaR.R
 \name{findMarkerThresholds}
 \alias{findMarkerThresholds}
-\title{Find optimized values for minES and maxClustersPerGene in marker threshold matrix.
-Assumes that most stringent parameter combination is in the bottom left corner
-and the least stringent combination is in the upper right corner of the
-marker threshold matrix.}
+\title{Find Marker Thresholds}
 \usage{
 findMarkerThresholds(MTM, targetValue = max(MTM))
 }

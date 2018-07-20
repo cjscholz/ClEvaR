@@ -13,12 +13,23 @@
 
 # *** clusterings should be vectors of POSITIVE (>0!!!) integers ***
 
+#' Calculate Shannon Entropy
+#'
+#' @param subject Vector of reference cluster assignments.
+#' @return Mutual Information, a numeric vector of length 1.
+#' @export
+entropy <- function(subject) {
+  s1 <- tabulate(subject)
+  N <- length(subject)
+  return(-sum(s1*log(s1/N))/N)
+}
 
 #' Mutual Information
 #'
 #' @param subject Vector of reference cluster assignments.
 #' @param query Vector of cluster assignments for comparison.
 #' @return Mutual Information, a numeric vector of length 1.
+#' @export
 MI <- function(subject, query) {
   # infotheo license: GPL (>= 3)
   infotheo::mutinformation(X = subject,
@@ -35,12 +46,9 @@ MI <- function(subject, query) {
 #' @export
 NMI <- function(subject, query) {
   mi <- MI(subject, query)
-  s1 <- tabulate(subject)
-  s2 <- tabulate(query)
-  N <- length(subject)
-  h1 <- -sum(s1*log(s1/N))/N
-  h2 <- -sum(s2*log(s2/N))/N
-  nmi <- mi/max(h1, h2)
+  es <- entropy(subject)
+  eq <- entropy(query)
+  nmi <- mi/max(es, eq)
   return(nmi)
 }
 
@@ -53,8 +61,9 @@ EMI <- function(subject, query) {
   mi <- MI(subject, query)
   s1 <- tabulate(subject)
   s2 <- tabulate(query)
-  N <- l1 <- length(subject)
-  l2 <- length(query)
+  N <- length(subject)
+  l1 <- length(s1)
+  l2 <- length(s2)
   s_emi <- 0
   for(i in 1:l1){
     for (j in 1:l2){
@@ -88,12 +97,9 @@ EMI <- function(subject, query) {
 AMI <- function(subject, query) {
   mi <- MI(subject, query)
   emi <- EMI(subject, query)
-  s1 <- tabulate(subject)
-  s2 <- tabulate(query)
-  N <- length(subject)
-  h1 <- -sum(s1*log(s1/N))/N
-  h2 <- -sum(s2*log(s2/N))/N
-  ami <- (mi-emi)/max(h1,h2)
+  es <- entropy(subject)
+  eq <- entropy(query)
+  ami <- (mi-emi)/max(es, eq)
   return(ami)
 }
 
@@ -135,7 +141,7 @@ clusterExclusivity <- function(subject, query, maxIgnore = 0) {
 ## FASTGenomics I/O
 #################################################
 
-#' Read expression data from FASTGenomics HDF5 file.
+#' Read expression data from FASTGenomics dense HDF5 file.
 #'
 #' @param fileName Name of FASTGenomics HDF5 file.
 #' @param cellIDs Optional vector of cell IDs (i.e. row names) to be read from FASTGenomics HDF5 file.
@@ -145,12 +151,12 @@ clusterExclusivity <- function(subject, query, maxIgnore = 0) {
 #' @param variablesName Dataset name of variable (i.e. gene) name vector in HDF5 file; defaults to "/var_names".
 #' @return A sparse Matrix of expression values in cells x genes format.
 #' @export
-readFGH5 <- function(fileName,
-                     cellIDs = NULL,
-                     geneIDs = NULL,
-                     matrixName = "/matrix",
-                     observationsName = "/obs_names",
-                     variablesName = "/var_names") {
+readFGH5dense <- function(fileName,
+                          cellIDs = NULL,
+                          geneIDs = NULL,
+                          matrixName = "/matrix",
+                          observationsName = "/obs_names",
+                          variablesName = "/var_names") {
   tmpH5 <- h5::h5file(fileName)
   cellIndex <- if (is.null(cellIDs)) {
     rep(TRUE, length(tmpH5[observationsName][]))
@@ -178,6 +184,8 @@ readFGH5 <- function(fileName,
 ## Differentially Expressed Genes
 #################################################
 
+#' Select Marker Genes
+#'
 #' Select potential marker genes from differentially expressed genes on effect size and presence in other clusters
 #'
 #' @param FGDEGtab The raw FASTGenomics Differentially Expressed Gene table, e.g. the output from FASTGenomics calc_de_genes_nonparametric.
@@ -204,6 +212,8 @@ selectMarkerGenes <- function(FGDEGtab,
 }
 
 
+#' Characterize Marker Thresholds
+#'
 #' Construct a matrix of clusters with marker genes captured with
 #' ranges of effect size and cluster hit threshold values.
 #' The resulting matrix should help at selecting optimal threshold values.
@@ -248,6 +258,8 @@ characterizeMarkerThresholds <- function(FGDEGtab,
 }
 
 
+#' Find Marker Thresholds
+#'
 #' Find optimized values for minES and maxClustersPerGene in marker threshold matrix.
 #' Assumes that most stringent parameter combination is in the bottom left corner
 #' and the least stringent combination is in the upper right corner of the
@@ -460,17 +472,18 @@ plotDonuts <- function(subject, query, subquery = NULL, savePDF = FALSE, ...) {
 }
 
 
-# http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
-# Multiple plot function
-#
-# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
-# - cols:   Number of columns in layout
-# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
-#
-# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
-# then plot 1 will go in the upper left, 2 will go in the upper right, and
-# 3 will go all the way across the bottom.
-#
+#' Multiple Plot Function
+#'
+#' Taken from http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
+#' If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+#' then plot 1 will go in the upper left, 2 will go in the upper right, and
+#' 3 will go all the way across the bottom.
+#'
+#' @param ... ggplot obejects to plot
+#' @param plotlist An optional list of ggplot objects.
+#' @param cols Number of columns in layout; defaults to 1.
+#' @param layout A matrix specifying the layout. If present, 'cols' is ignored.
+#' @export
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
 
