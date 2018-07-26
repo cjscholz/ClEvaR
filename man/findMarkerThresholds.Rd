@@ -12,7 +12,7 @@ findMarkerThresholds(MTM, targetValue = max(MTM))
 \item{targetValue}{The minimum target value that will be searched the the marker threshold matrix; defaults to \code{max(MTM)}.}
 }
 \value{
-A vector of length 2 containing optimized values for minES and maxClustersPerGene.
+A list with elements minES and maxClustersPerGene.
 }
 \description{
 Find optimized values for minES and maxClustersPerGene in marker threshold matrix.

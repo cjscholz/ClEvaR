@@ -267,15 +267,19 @@ characterizeMarkerThresholds <- function(FGDEGtab,
 #'
 #' @param MTM The marker threshold matrix.
 #' @param targetValue The minimum target value that will be searched the the marker threshold matrix; defaults to \code{max(MTM)}.
-#' @return A vector of length 2 containing optimized values for minES and maxClustersPerGene.
+#' @return A list with elements minES and maxClustersPerGene.
 findMarkerThresholds <- function(MTM,
                                  targetValue = max(MTM)) {
-  thresholdReached <- MTM>=targetValue
-  # flip the matrix so that high stringency has high index positions
-  thresholdReached <- thresholdReached[, seq(ncol(thresholdReached, 1))]
-  # apply(thresholdReached, 1, function(x) ifelse(sum(x)>0, max(which(x)), 0))
-  # apply(thresholdReached, 1, function(y) ifelse(sum(y)>0, max(which(y)), 0))
-  # ...
+  # flip the matrix so that high stringency has low index positions
+  MTM <- MTM[seq(nrow(MTM), 1),]
+  x <- apply(MTM, 2, function(x, t) any(x>=t), t = targetValue)
+  y <- suppressWarnings(apply(MTM, 2, function(x, t) max(which(x>=t)), t = targetValue))
+  hits_x <- which(x)
+  hits_y <- y[hits_x]
+  optimal_xy_pos <- which.min(hits_x+hits_y)
+  tradeoff <- list(minES = as.numeric(sub("ES=", "", rownames(MTM)[hits_y[optimal_xy_pos]])),
+                   maxClustersPerGene = as.numeric(sub(" cluster", "", colnames(MTM)[hits_x[optimal_xy_pos]])))
+  return(tradeoff)
 }
 
 
