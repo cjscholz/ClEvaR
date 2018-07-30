@@ -274,3 +274,34 @@ clusterExprsSummaryMatrix <- function(FGDEGtab,
 }
 
 
+
+#################################################
+## Cell Type Assignment
+#################################################
+
+#' Classify cells using marker genes.
+#'
+#' @param dataset A FASTGenomics Matrix of expression values.
+#' @param markerGenes An optional data frame with scores of marker genes for cell types; the immune cell marker definition of Novashtern et al., Cell (2011) is provided as default.
+#' @param geneColumn Gene column name in markerGenes data frame; defaults to \code{gene_id}.
+#' @param scoreColumn Score column name in markerGenes data frame; defaults to \code{score}.
+#' @param classColumn Class column name in markerGenes data frame; defaults to \code{cell_type}.
+#' @return A data frame with class assignment and scores for classes per cell.
+#' @export
+scoreCells <- function(dataset,
+                       markerGenes = data(novashtern2011),
+                       geneColumn = "gene_id",
+                       scoreColumn = "score",
+                       classColumn = "cell_type") {
+  signatures <- markerGenes[markerGenes[, geneColumn] %in% rownames(dataset),]
+  signatures <- split(signatures, f = signatures[, classColumn])
+  assignStats <- data.frame(cell_id = colnames(dataset),
+                            stringsAsFactors = FALSE)
+  for (i in names(signatures)) {
+    assignStats[, i] <- apply(dataset[signatures[[i]][, geneColumn],], 2,
+                              function(x, s) sum(x*s), s = signatures[[i]][, scoreColumn])
+  }
+  tmp <- apply(assignStats[, -1], 1, function(x) which(x==max(x))[1])
+  assignStats[, classColumn] <- colnames(assignStats)[tmp+1]
+  return(assignStats)
+}
