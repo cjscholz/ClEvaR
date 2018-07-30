@@ -289,10 +289,14 @@ clusterExprsSummaryMatrix <- function(FGDEGtab,
 #' @return A data frame with class assignment and scores for classes per cell.
 #' @export
 scoreCells <- function(dataset,
-                       markerGenes = data(novashtern2011),
+                       markerGenes = NULL,
                        geneColumn = "gene_id",
                        scoreColumn = "score",
                        classColumn = "cell_type") {
+  if (is.null(markerGenes)) {
+    data("novershtern2011")
+    markerGenes <- novershtern2011
+  }
   signatures <- markerGenes[markerGenes[, geneColumn] %in% rownames(dataset),]
   signatures <- split(signatures, f = signatures[, classColumn])
   assignStats <- data.frame(cell_id = colnames(dataset),
