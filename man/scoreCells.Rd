@@ -4,16 +4,15 @@
 \alias{scoreCells}
 \title{Classify cells using marker genes.}
 \usage{
-scoreCells(dataset, markerGenes = data(novashtern2011),
-  geneColumn = "gene_id", scoreColumn = "score",
-  classColumn = "cell_type")
+scoreCells(dataset, markerGenes = NULL, geneColumn = "entrez_id",
+  scoreColumn = "score", classColumn = "cell_type")
 }
 \arguments{
 \item{dataset}{A FASTGenomics Matrix of expression values.}
 
-\item{markerGenes}{An optional data frame with scores of marker genes for cell types; the immune cell marker definition of Novashtern et al., Cell (2011) is provided as default.}
+\item{markerGenes}{An optional data frame with scores of marker genes for cell types; the canonical immune cell markers compiled from Novashtern et al., Cell (2011) is provided as default.}
 
-\item{geneColumn}{Gene column name in markerGenes data frame; defaults to \code{gene_id}.}
+\item{geneColumn}{Gene column name in markerGenes data frame; defaults to \code{entrez_id}.}
 
 \item{scoreColumn}{Score column name in markerGenes data frame; defaults to \code{score}.}
 
