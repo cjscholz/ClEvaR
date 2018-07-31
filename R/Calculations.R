@@ -295,7 +295,7 @@ scoreCells <- function(dataset,
                        classColumn = "cell_type") {
   if (is.null(markerGenes)) {
     data("canonical_immune_markers")
-    markerGenes <- novershtern2011
+    markerGenes <- canonical_immune_markers
   }
   signatures <- markerGenes[markerGenes[, geneColumn] %in% rownames(dataset),]
   signatures <- split(signatures, f = signatures[, classColumn])

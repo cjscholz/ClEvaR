@@ -8,6 +8,6 @@ It also provides functionality to work with files produced by the [FASTGenomics]
 
 ## Installation
 
-'''
+```
 devtools::install_github("cjscholz/ClEvaR")
-'''
+```

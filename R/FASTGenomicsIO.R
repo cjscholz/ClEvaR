@@ -156,3 +156,45 @@ readFGH5dense <- function(filename,
   h5::h5close(file_to_open)
   return(return_object)
 }
+
+
+#' Retrieve observations from FASTGenomics Matrix HDF5 file.
+#'
+#' Observations typically correspond to cells.
+#' @param filename Name of FASTGenomics HDF5 file.
+#' @return A vector of observation IDs.
+#' @export
+observationsFGH5 <- function(filename) {
+  file_to_open <- h5::h5file(filename)
+  observations <- file_to_open["/obs_names"][]
+  h5::h5close(file_to_open)
+  return(observations)
+}
+
+
+#' Retrieve variables from FASTGenomics Matrix HDF5 file.
+#'
+#' Variables typically correspond to genes.
+#' @param filename Name of FASTGenomics HDF5 file.
+#' @return A vector of variable IDs.
+#' @export
+variablesFGH5 <- function(filename) {
+  file_to_open <- h5::h5file(filename)
+  variables <- file_to_open["/var_names"][]
+  h5::h5close(file_to_open)
+  return(variables)
+}
+
+
+#' Determine the number of chunks of a FASTGenomics Matrix HDF5 file.
+#'
+#' @param filename Name of FASTGenomics HDF5 file.
+#' @param chunkSize Number of cells per chunk, defaults to 10000.
+#' @return The number of chunks.
+#' @export
+maxChunkFGH5 <- function(filename,
+                         chunkSize = 10000) {
+  observations <- observationsFGH5(filename)
+  n_chunks <- ceiling(length(observations)/chunkSize)
+  return(n_chunks)
+}

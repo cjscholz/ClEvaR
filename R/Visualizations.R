@@ -63,7 +63,7 @@ makeDonuts <- function(subject,
   plotTable <- subset(plotTable, count!=0)
   plotTable <- plotTable[order(plotTable$subject),]
   plotTable$prop <- plotTable$from <- plotTable$to <- 0
-  
+
   for (i in levels(subject)) {
     index <- plotTable$subject==i
     plotTable$prop[index] <- plotTable$count[index] / sum(plotTable$count[index])
@@ -127,7 +127,7 @@ plotLegend <- function(data, subquery = FALSE) {
   legendColors <- list()
   legendColors[[clusterColumn]] <- data[,2]
   names(legendColors[[clusterColumn]]) <- levels(data[,1])
-  
+
   pheatmap::pheatmap(legendDf,
                      cellwidth = 10,
                      border_color = NA,
@@ -176,12 +176,12 @@ plotDonuts <- function(subject, query, subquery = NULL, savePDF = FALSE, ...) {
 #' @export
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
-  
+
   # Make a list from the ... arguments and plotlist
   plots <- c(list(...), plotlist)
-  
+
   numPlots = length(plots)
-  
+
   # If layout is NULL, then use 'cols' to determine layout
   if (is.null(layout)) {
     # Make the panel
@@ -191,20 +191,20 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
                      ncol = cols, nrow = ceiling(numPlots/cols))
     layout <- t(layout)
   }
-  
+
   if (numPlots==1) {
     print(plots[[1]])
-    
+
   } else {
     # Set up the page
     grid.newpage()
     pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-    
+
     # Make each plot, in the correct location
     for (i in 1:numPlots) {
       # Get the i,j matrix positions of the regions that contain this subplot
       matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-      
+
       print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
                                       layout.pos.col = matchidx$col))
     }
@@ -252,4 +252,29 @@ confusionHeatmap <- function(subject,
                      cluster_cols = FALSE,
                      ...)
   return(confusionMatrix)
+}
+
+
+#' Generate cluster integrity plot.
+#'
+#' A Granularity vs. Integrity scatterplot.
+#' @param subject \code{Vector} of reference cluster assignments.
+#' @param query \code{Vector} of cluster assignments for comparison with reference.
+#' @return A \code{ggplot} object.
+#' @examples
+#' a = c(rep("A", 1000), rep("B", 100), rep("C", 10))
+#' b = c(rep("A", 500), rep("B", 595), rep("C", 15))
+#' integrityPlot(a, b)
+#' @export
+integrityPlot <- function(subject,
+                          query) {
+  df <- data.frame(x = clusterIntegrity(subject, query),
+                   y = clusterGranularity(subject, query, plot = FALSE),
+                   stringsAsFactors = FALSE)
+  gg <- ggplot2::ggplot(df, ggplot2::aes(x=x, y=y)) +
+    ggplot2::geom_point() +
+    ggplot2::xlim(0, 1) +
+    ggplot2::xlab("Integrity") +
+    ggplot2::ylab("Granularity")
+  return(gg)
 }
