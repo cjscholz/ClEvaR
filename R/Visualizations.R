@@ -265,16 +265,24 @@ confusionHeatmap <- function(subject,
 #' a = c(rep("A", 1000), rep("B", 100), rep("C", 10))
 #' b = c(rep("A", 500), rep("B", 595), rep("C", 15))
 #' integrityPlot(a, b)
+#'
+#' data(zeisel2018)
+#' integrityPlot(subject = zeisel2018$cell_metadata$class,
+#'               query = zeisel2018$cell_metadata$cluster_name)
 #' @export
 integrityPlot <- function(subject,
                           query) {
   df <- data.frame(x = clusterIntegrity(subject, query),
                    y = clusterGranularity(subject, query, plot = FALSE),
                    stringsAsFactors = FALSE)
+  ami <- AMI(subject = factor(subject),
+             query = factor(query))
+  title <- paste("AMI = ", round(ami, digits = 2), sep = "")
   gg <- ggplot2::ggplot(df, ggplot2::aes(x=x, y=y)) +
     ggplot2::geom_point() +
     ggplot2::xlim(0, 1) +
     ggplot2::xlab("Integrity") +
-    ggplot2::ylab("Granularity")
+    ggplot2::ylab("Granularity") +
+    ggplot2::ggtitle(title)
   return(gg)
 }

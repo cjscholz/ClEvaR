@@ -26,3 +26,14 @@
 #' }
 #' @source \url{https://www.cell.com/cell/abstract/S0092-8674(11)00005-5}
 "canonical_immune_markers"
+
+#' Molecular architecture of the mouse nervous system.
+#'
+#' @format A list with 3 items:
+#' \describe{
+#'   \item{cell_types}{A data frame describing the 265 nervous cell types.}
+#'   \item{cell_markes}{A data frame with marker genes for cell types as symbols and entrez ids.}
+#'   \item{cell_metadata}{A data frame with metadata of 160k cells from the mouse nervous tissue.}
+#' }
+#' @source \url{http://mousebrain.org}
+"zeisel2018"

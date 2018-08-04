@@ -21,4 +21,8 @@ A Granularity vs. Integrity scatterplot.
 a = c(rep("A", 1000), rep("B", 100), rep("C", 10))
 b = c(rep("A", 500), rep("B", 595), rep("C", 15))
 integrityPlot(a, b)
+
+data(zeisel2018)
+integrityPlot(subject = zeisel2018$cell_metadata$class,
+              query = zeisel2018$cell_metadata$cluster_name)
 }
