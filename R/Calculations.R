@@ -103,6 +103,50 @@ AMI <- function(subject, query) {
 }
 
 
+#' Compute the HBITM similarity between two clusterings.
+#'
+#' @param subject Vector of reference cluster assignments.
+#' @param query Vector of cluster assignments for comparison.
+#' @param weighted Use weights? Defaults to \code{TRUE}.
+#' @return The (weighted) HBITM ("How blue is the matrix?") measure, a numeric vector of length 1.
+#' @examples
+#' a = c(rep("A", 1000), rep("B", 100), rep("C", 10))
+#' b = c(rep("A", 500), rep("B", 595), rep("C", 15))
+#' HBITM(subject = a, query = b, weighted = TRUE)
+#' HBITM(subject = a, query = b, weighted = FALSE)
+#'
+#' data(zeisel2018)
+#' HBITM(subject = zeisel2018$cell_metadata$class,
+#'       query = zeisel2018$cell_metadata$cluster_name,
+#'       weighted = TRUE)
+#' HBITM(subject = zeisel2018$cell_metadata$class,
+#'       query = zeisel2018$cell_metadata$cluster_name,
+#'       weighted = FALSE)
+#' @export
+HBITM <- function(subject,
+                  query,
+                  weighted = TRUE) {
+  m <- as.matrix(ftable(subject~query))
+  if (ncol(m)>nrow(m)) m <- t(m)
+  contrast_weights <- if (weighted) {
+    rowSums(m)
+  } else {
+    rep(1, nrow(m))
+  }
+  max_index <- apply(m , 1, which.max)
+  max_values <- sapply(1:nrow(m), function(x, m, i) m[x, i[x]],
+                       m = m,
+                       i = max_index)
+  not_max_sum <- sapply(1:nrow(m), function(x, m, i) mean(m[x, -i[x]]),
+                        m = m,
+                        i = max_index)
+  row_contrast <- (max_values-not_max_sum)/(max_values+not_max_sum)
+  contrast_sum <- sum(row_contrast * contrast_weights)
+  best_sum <- sum(contrast_weights)
+  return(contrast_sum/best_sum)
+}
+
+
 #################################################
 ## Cluster Integrity
 #################################################
