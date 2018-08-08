@@ -282,7 +282,7 @@ clusterExprsSummaryMatrix <- function(FGDEGtab,
 #' Classify cells using marker genes.
 #'
 #' @param dataset A FASTGenomics Matrix of expression values.
-#' @param markerGenes An optional data frame with scores of marker genes for cell types; the canonical immune cell markers compiled from Novashtern et al., Cell (2011) is provided as default.
+#' @param markerGenes An optional data frame with scores of marker genes for cell types; the immune cell markers compiled from Newman et al., Nature Methods (2015) is provided as default.
 #' @param geneColumn Gene column name in markerGenes data frame; defaults to \code{entrez_id}.
 #' @param scoreColumn Score column name in markerGenes data frame; defaults to \code{score}.
 #' @param classColumn Class column name in markerGenes data frame; defaults to \code{cell_type}.
@@ -294,8 +294,8 @@ scoreCells <- function(dataset,
                        scoreColumn = "score",
                        classColumn = "cell_type") {
   if (is.null(markerGenes)) {
-    data("canonical_immune_markers")
-    markerGenes <- canonical_immune_markers
+    data("newman2015")
+    markerGenes <- newman2015
   }
   signatures <- markerGenes[markerGenes[, geneColumn] %in% rownames(dataset),]
   signatures <- split(signatures, f = signatures[, classColumn])

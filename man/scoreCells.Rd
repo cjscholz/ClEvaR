@@ -10,7 +10,7 @@ scoreCells(dataset, markerGenes = NULL, geneColumn = "entrez_id",
 \arguments{
 \item{dataset}{A FASTGenomics Matrix of expression values.}
 
-\item{markerGenes}{An optional data frame with scores of marker genes for cell types; the canonical immune cell markers compiled from Novashtern et al., Cell (2011) is provided as default.}
+\item{markerGenes}{An optional data frame with scores of marker genes for cell types; the immune cell markers compiled from Newman et al., Nature Methods (2015) is provided as default.}
 
 \item{geneColumn}{Gene column name in markerGenes data frame; defaults to \code{entrez_id}.}
 

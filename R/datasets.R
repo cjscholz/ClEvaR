@@ -12,6 +12,21 @@
 "novershtern2011"
 
 
+#' Immune cell marker genes and scores.
+#'
+#' The log10 transformed expression matrix used in CIBERSORT to deconvolute immune cell types.
+#'
+#' @format A data frame with 12034 rows and 4 variables:
+#' \describe{
+#'   \item{gene_symbol}{Official gene symbol}
+#'   \item{entrez_id}{Entrez Gene ID}
+#'   \item{score}{Cell type score for this gene}
+#'   \item{cell_type}{Named cell type defined by marker genes}
+#' }
+#' @source \url{https://doi.org/10.1038/nmeth.3337}
+"newman2015"
+
+
 #' Canonical marker genes of the hematopoietic lineage.
 #'
 #' A list of canonical immune cell marker genes compiled from Figure 1 in Novershtern et al., Cell (2011).
@@ -26,6 +41,7 @@
 #' }
 #' @source \url{https://www.cell.com/cell/abstract/S0092-8674(11)00005-5}
 "canonical_immune_markers"
+
 
 #' Molecular architecture of the mouse nervous system.
 #'
