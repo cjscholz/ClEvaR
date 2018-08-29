@@ -65,17 +65,8 @@ readFGH5sparse <- function(filename,
     return_object <- Matrix::sparseMatrix(x = file_to_open["/matrix/data"][],
                                           i = file_to_open["/matrix/indices"][],
                                           p = file_to_open["/matrix/indptr"][],
-                                          index1 = FALSE)
-    rownames(return_object) <- if (nrow(return_object)==length(observations)) {
-      observations
-    } else if (nrow(return_object)==length(variables)) {
-      variables
-    }
-    colnames(return_object) <- if (ncol(return_object)==length(variables)) {
-      variables
-    } else if (ncol(return_object)==length(observations)) {
-      observations
-    }
+                                          index1 = FALSE,
+                                          dimnames = list(variables, observations))
   } else {
     if (!is.null(fromCell) & !is.null(toCell)) {
       start_index <- fromCell
@@ -91,20 +82,14 @@ readFGH5sparse <- function(filename,
     }
     index_pointer <- file_to_open["/matrix/indptr"][c(cell_index[1], cell_index+1)]
     file_index <- seq(min(index_pointer)+1, max(index_pointer))
+    expression_index <- file_to_open["/matrix/indices"][file_index]
     return_object <- Matrix::sparseMatrix(x = file_to_open["/matrix/data"][file_index],
-                                          i = file_to_open["/matrix/indices"][file_index],
+                                          i = expression_index,
                                           p = index_pointer-min(index_pointer),
                                           index1 = FALSE)
-    rownames(return_object) <- if (nrow(return_object)==length(cell_index)) {
-      observations[cell_index]
-    } else if (nrow(return_object)==length(variables)) {
-      variables
-    }
-    colnames(return_object) <- if (ncol(return_object)==length(variables)) {
-      variables
-    } else if (ncol(return_object)==length(cell_index)) {
-      observations[cell_index]
-    }
+    detected_index <- unique(expression_index) + 1
+    colnames(return_object) <- observations[cell_index]
+    rownames(return_object) <- variables[detected_index]
   }
   h5::h5close(file_to_open)
   return(return_object)
@@ -140,19 +125,10 @@ readFGH5dense <- function(filename,
     # what if chunk outside index range?
     cell_index <- seq(start_index, stop_index)
   }
+  dim_names <- list(variables, observations[cell_index])
   return_object <- Matrix::Matrix(file_to_open["/matrix"][cell_index, ],
-                                  sparse = TRUE)
-  if (nrow(return_object)==length(cell_index))
-  rownames(return_object) <- if (nrow(return_object)==length(cell_index)) {
-    observations[cell_index]
-  } else if (nrow(return_object)==length(variables)) {
-    variables
-  }
-  colnames(return_object) <- if (ncol(return_object)==length(variables)) {
-    variables
-  } else if (ncol(return_object)==length(cell_index)) {
-    observations[cell_index]
-  }
+                                  sparse = TRUE,
+                                  dimnames = dim_names)
   h5::h5close(file_to_open)
   return(return_object)
 }
@@ -197,4 +173,17 @@ maxChunkFGH5 <- function(filename,
   observations <- observationsFGH5(filename)
   n_chunks <- ceiling(length(observations)/chunkSize)
   return(n_chunks)
+}
+
+
+#' Read FASTGenomics Autoencoder Output
+#' @param filename Name of Autoencoder output file, defaults to \code{encoded_data.h5}.
+readAEoutput <- function(filename = "encoded_data.h5") {
+  require(h5)
+  ftr <- h5file(filename)
+  data <- ftr["/matrix"][]
+  rownames(data) <- ftr["/obs_names"][]
+  colnames(data) <- ftr["/var_names"][]
+  h5close(ftr)
+  return(data)
 }

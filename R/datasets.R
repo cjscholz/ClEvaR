@@ -2,21 +2,21 @@
 #'
 #' A list of immune cell marker genes compiled from Novershtern et al., Cell (2011).
 #'
-#' @format A data frame with 15088 rows and 3 variables:
+#' @format A data frame with 15,088 rows and 3 variables:
 #' \describe{
 #'   \item{entrez_id}{Entrez Gene ID}
 #'   \item{score}{Cell type score for this gene}
 #'   \item{cell_type}{Cell type defined by marker genes}
 #' }
 #' @source \url{https://www.cell.com/cell/abstract/S0092-8674(11)00005-5}
-"novershtern2011"
+"immune_markers_novershtern2011"
 
 
 #' Immune cell marker genes and scores.
 #'
-#' The log10 transformed expression matrix used in CIBERSORT to deconvolute immune cell types.
+#' The LM22 signature expression matrix used by Newman et al. (2015), with linear scale expression values divided by 1000 used as scores.
 #'
-#' @format A data frame with 12034 rows and 4 variables:
+#' @format A data frame with 12,034 rows and 4 variables:
 #' \describe{
 #'   \item{gene_symbol}{Official gene symbol}
 #'   \item{entrez_id}{Entrez Gene ID}
@@ -24,7 +24,22 @@
 #'   \item{cell_type}{Named cell type defined by marker genes}
 #' }
 #' @source \url{https://doi.org/10.1038/nmeth.3337}
-"newman2015"
+"immune_markers_lm22"
+
+
+#' Cell type marker genes and scores.
+#'
+#' Marker gene scores generated from Blueprint+ENCODE expression profiles compiled for singleR package.
+#'
+#' @format A data frame with 7,876 rows and 4 variables:
+#' \describe{
+#'   \item{gene_symbol}{Official gene symbol}
+#'   \item{entrez_id}{Entrez Gene ID}
+#'   \item{score}{Cell type score for this gene}
+#'   \item{cell_type}{Named cell type defined by marker genes}
+#' }
+#' @source \url{https://github.com/dviraran/SingleR/tree/master/data}
+"immune_markers_blueprint"
 
 
 #' Canonical marker genes of the hematopoietic lineage.
@@ -40,7 +55,7 @@
 #'   \item{cell_type}{Named cell type defined by marker genes}
 #' }
 #' @source \url{https://www.cell.com/cell/abstract/S0092-8674(11)00005-5}
-"canonical_immune_markers"
+"immune_markers_canonical"
 
 
 #' Molecular architecture of the mouse nervous system.

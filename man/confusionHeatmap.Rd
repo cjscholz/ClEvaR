@@ -4,7 +4,8 @@
 \alias{confusionHeatmap}
 \title{Plot a confusion heatmap.}
 \usage{
-confusionHeatmap(subject, query, logCounts = FALSE, rankCounts = FALSE, ...)
+confusionHeatmap(subject, query, logCounts = FALSE, rankCounts = FALSE,
+  cluster = FALSE, ...)
 }
 \arguments{
 \item{subject}{\code{Vector} of reference cluster assignments.}
@@ -14,6 +15,8 @@ confusionHeatmap(subject, query, logCounts = FALSE, rankCounts = FALSE, ...)
 \item{logCounts}{Should counts in confusion matrix be \code{log10(counts+1)} transformed? Defaults to \code{FALSE}.}
 
 \item{rankCounts}{Should counts in confusion matrix be ranked? Defaults to \code{FALSE}.}
+
+\item{cluster}{Should rows and columns be hierarchically clustered? Defaults to \code{FALSE}.}
 
 \item{...}{Further parameters for \code{pheatmap} function.}
 }

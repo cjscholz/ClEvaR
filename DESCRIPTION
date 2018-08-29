@@ -14,4 +14,4 @@ Imports:
     ggplot2 (>= 2.2.1),
     pheatmap (>= 1.0.10)
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

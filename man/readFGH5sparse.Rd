@@ -4,8 +4,8 @@
 \alias{readFGH5sparse}
 \title{Read FASTGenomics Matrix in sparse HDF5 format.}
 \usage{
-readFGH5sparse(filename, chunk = NULL, chunkSize = 10000, fromCell = NULL,
-  toCell = NULL)
+readFGH5sparse(filename, chunk = NULL, chunkSize = 10000,
+  fromCell = NULL, toCell = NULL)
 }
 \arguments{
 \item{filename}{Name of FASTGenomics HDF5 file.}

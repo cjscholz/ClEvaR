@@ -4,8 +4,8 @@
 \alias{readFGH5dense}
 \title{Read FASTGenomics Matrix in dense HDF5 format.}
 \usage{
-readFGH5dense(filename, chunk = NULL, chunkSize = 10000, fromCell = NULL,
-  toCell = NULL)
+readFGH5dense(filename, chunk = NULL, chunkSize = 10000,
+  fromCell = NULL, toCell = NULL)
 }
 \arguments{
 \item{filename}{Name of FASTGenomics HDF5 file.}

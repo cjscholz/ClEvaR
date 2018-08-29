@@ -13,6 +13,7 @@
 #' @param pieCut \code{integer} giving the radius of the query pie if subquery is defined; should be within the \code{pieLim} range; defaults to \code{2.5}.
 #' @param piesPerRow Number of pies per row.
 #' @return A \code{list} with elements \code{donuts} (a ggplot object) and \code{data} (the underlying data.frame).
+#' @export
 makeDonuts <- function(subject,
                        query,
                        subquery = NULL,
@@ -110,6 +111,7 @@ makeDonuts <- function(subject,
 #' Plot the legend(s) for donut plots.
 #'
 #' @param data \code{data.frame} returned from \code{makeDonuts} in list element \code{data}.
+#' @export
 plotLegend <- function(data, subquery = FALSE) {
   if (subquery) {
     clusterColumn <- "subquery"
@@ -220,6 +222,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 #' @param query \code{Vector} of cluster assignments for comparison with reference.
 #' @param logCounts Should counts in confusion matrix be \code{log10(counts+1)} transformed? Defaults to \code{FALSE}.
 #' @param rankCounts Should counts in confusion matrix be ranked? Defaults to \code{FALSE}.
+#' @param cluster Should rows and columns be hierarchically clustered? Defaults to \code{FALSE}.
 #' @param ... Further parameters for \code{pheatmap} function.
 #' @return A \code{matrix} with possibly transformed counts.
 #' @examples
@@ -233,6 +236,7 @@ confusionHeatmap <- function(subject,
                              query,
                              logCounts = FALSE,
                              rankCounts = FALSE,
+                             cluster = FALSE,
                              ...) {
   confusionMatrix <- as.matrix(ftable(subject~query))
   if (logCounts) confusionMatrix <- log10(confusionMatrix+1)
@@ -248,8 +252,8 @@ confusionHeatmap <- function(subject,
   index <- order(apply(confusionMatrix, 1, max), decreasing = TRUE)
   confusionMatrix <- confusionMatrix[index,]
   pheatmap::pheatmap(confusionMatrix,
-                     cluster_rows = FALSE,
-                     cluster_cols = FALSE,
+                     cluster_rows = cluster,
+                     cluster_cols = cluster,
                      ...)
   return(confusionMatrix)
 }
@@ -275,9 +279,9 @@ integrityPlot <- function(subject,
   df <- data.frame(x = clusterIntegrity(subject, query),
                    y = clusterGranularity(subject, query, plot = FALSE),
                    stringsAsFactors = FALSE)
-  ami <- AMI(subject = factor(subject),
-             query = factor(query))
-  title <- paste("AMI = ", round(ami, digits = 2), sep = "")
+  hbitm <- HBITM(subject = factor(subject),
+                 query = factor(query))
+  title <- paste("weighted HBITM = ", round(hbitm, digits = 2), sep = "")
   gg <- ggplot2::ggplot(df, ggplot2::aes(x=x, y=y)) +
     ggplot2::geom_point() +
     ggplot2::xlim(0, 1) +

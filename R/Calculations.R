@@ -338,8 +338,8 @@ scoreCells <- function(dataset,
                        scoreColumn = "score",
                        classColumn = "cell_type") {
   if (is.null(markerGenes)) {
-    data("newman2015")
-    markerGenes <- newman2015
+    data("immune_markers_lm22")
+    markerGenes <- immune_markers_lm22
   }
   signatures <- markerGenes[markerGenes[, geneColumn] %in% rownames(dataset),]
   signatures <- split(signatures, f = signatures[, classColumn])
@@ -352,4 +352,57 @@ scoreCells <- function(dataset,
   tmp <- apply(assignStats[, -1], 1, function(x) which(x==max(x))[1])
   assignStats[, classColumn] <- colnames(assignStats)[tmp+1]
   return(assignStats)
+}
+
+
+#' Classify cells using marker genes.
+#'
+#' Performs cell typing on chunks of FASTGenomics expression files. Useful for large datasets and limited computing ressources.
+#' @param dataset A FASTGenomics Matrix of expression values.
+#' @param filename Name of FASTGenomics HDF5 file.
+#' @param markerGenes An optional data frame with scores of marker genes for cell types; the immune cell markers compiled from Newman et al., Nature Methods (2015) is provided as default.
+#' @param geneColumn Gene column name in markerGenes data frame; defaults to \code{entrez_id}.
+#' @param scoreColumn Score column name in markerGenes data frame; defaults to \code{score}.
+#' @param classColumn Class column name in markerGenes data frame; defaults to \code{cell_type}.
+#' @return A data frame with class assignment and scores for classes per cell.
+#' @export
+scoreCellsInChunks <- function(dataset = NULL,
+                               filename = NULL,
+                               chunkSize = 10000,
+                               markerGenes = NULL,
+                               geneColumn = "entrez_id",
+                               scoreColumn = "score",
+                               classColumn = "cell_type",
+                               verbose = TRUE) {
+  if (is.null(markerGenes)) {
+    data("immune_markers_lm22")
+    markerGenes <- immune_markers_lm22
+  }
+  tmp_types <- list()
+  if (!is.null(dataset)) {
+    n_chunks <- ceiling(ncol(dataset)/chunkSize)
+    for (i in 1:n_chunks) {
+      if (verbose) cat("Processing chunk", i, "of", n_chunks, "...\n")
+      start_index <- (i-1)*chunkSize+1
+      stop_index <- min(i*chunkSize, ncol(dataset))
+      tmp_types[[i]] <- scoreCells(dataset = dataset[, start_index:stop_index],
+                                   markerGenes = markerGenes,
+                                   geneColumn = geneColumn,
+                                   scoreColumn = scoreColumn,
+                                   classColumn = classColumn)
+    }
+
+  } else if (!is.null(filename)) {
+    n_chunks <- maxChunkFGH5(filename, chunkSize = chunkSize)
+    for (i in 1:n_chunks) {
+      if (verbose) cat("Processing chunk", i, "of", n_chunks, "...\n")
+      tmp_exprs <- readFGH5(filename, chunk = i, chunkSize = chunkSize)
+      tmp_types[[i]] <- scoreCells(dataset = tmp_exprs,
+                                   markerGenes = markerGenes,
+                                   geneColumn = geneColumn,
+                                   scoreColumn = scoreColumn,
+                                   classColumn = classColumn)
+    }
+  }
+  return(do.call(rbind, tmp_types))
 }

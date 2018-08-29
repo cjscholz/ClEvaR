@@ -5,8 +5,8 @@
 \title{Characterize Marker Thresholds}
 \usage{
 characterizeMarkerThresholds(FGDEGtab, esThresh = seq(0.5, 1, 0.01),
-  nThresh = NULL, clusterColumn = "cluster_id", geneColumn = "entrez_id",
-  effectColumn = "effect.size")
+  nThresh = NULL, clusterColumn = "cluster_id",
+  geneColumn = "entrez_id", effectColumn = "effect.size")
 }
 \arguments{
 \item{FGDEGtab}{The raw FASTGenomics Differentially Expressed Gene table, e.g. the output from FASTGenomics calc_de_genes_nonparametric.}
