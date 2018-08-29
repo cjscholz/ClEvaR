@@ -164,6 +164,50 @@ plotDonuts <- function(subject, query, subquery = NULL, savePDF = FALSE, ...) {
 }
 
 
+#' Make a scatterplot.
+#'
+#' Useful for 2D visualization of single cells colored with e.g. true cell type (the subject) and an assigned cluster (the query).
+#' @param x \code{Vector} of x coordinates.
+#' @param y \code{Vector} of y coordinates.
+#' @param subject \code{Vector} of reference cluster assignments.
+#' @param query \code{Vector} of cluster assignments for comparison with reference.
+#' @param subjectColors A named \code{Vector} of colors for reference clusters. Uses rainbow colors if not assigned.
+#' @param x_lab Label for x axis. Defaults to "x".
+#' @param y_lab Label for y axis. Defaults to "y".
+#' @param subject_lab Label for subject legend. Defaults to "subject".
+#' @param query_lab Label for query legend. Defaults to "query".
+#' @export
+makeScatterplot <- function(x,
+                            y,
+                            subject,
+                            query,
+                            subjectColors = NULL,
+                            x_lab = "x",
+                            y_lab = "y",
+                            subject_lab = "subject",
+                            query_lab = "query") {
+  if (is.null(subjectColors)) {
+    subjectColors <- rainbow(length(unique(subject)))
+    names(subjectColors) <- unique(subject)
+  }
+  df <- data.frame(x = x,
+                   y = y,
+                   subject = factor(subject),
+                   query = factor(query))
+  scatter_plot <- ggplot2::ggplot(df, ggplot2::aes(x = x, y = y, color = query)) +
+    ggplot2::geom_point(ggplot2::aes(fill = subject),
+                        pch=21,
+                        size=3) +
+    ggplot2::scale_fill_manual(values = subjectColors) +
+    ggplot2::theme_classic() +
+    ggplot2::labs(x = x_lab,
+                  y = y_lab,
+                  color = query_lab,
+                  fill = subject_lab)
+  return(scatter_plot)
+}
+
+
 #' Multiple Plot Function
 #'
 #' Taken from http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/

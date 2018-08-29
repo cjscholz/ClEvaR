@@ -178,6 +178,7 @@ maxChunkFGH5 <- function(filename,
 
 #' Read FASTGenomics Autoencoder Output
 #' @param filename Name of Autoencoder output file, defaults to \code{encoded_data.h5}.
+#' @export
 readAEoutput <- function(filename = "encoded_data.h5") {
   require(h5)
   ftr <- h5file(filename)

@@ -406,3 +406,23 @@ scoreCellsInChunks <- function(dataset = NULL,
   }
   return(do.call(rbind, tmp_types))
 }
+
+
+#################################################
+## Miscellaneous
+#################################################
+
+#' Scale to 0 - 1 range
+#'
+#' @param x Numeric vector of values to be scaled
+#' @param invert Scales smallest value in x to 1 and largest to 0 if \code{TRUE} and to 0 and 1 respectively if \code{FALSE}. Defaults to \code{TRUE}.
+#' @return Numeric vector scaled of values.
+#' @export
+scale_01 <- function(x, invert = TRUE) {
+  x <- x-min(x)
+  x <- x/max(x)
+  if (invert) {
+    x <- 1-x
+  }
+  return(x)
+}
